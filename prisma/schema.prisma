@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CARRIER
+  SHIPPER
+  ADMIN
+}
+
+enum ListingStatus {
+  AVAILABLE
+  BOOKED
+  PENDING
+}
+
+enum OrderStatus {
+  CONFIRMED
+  EN_ROUTE
+  DELIVERED
+  EXCEPTION
+  IN_REVIEW
+}
+
+enum MessageChannel {
+  PLATFORM
+  EMAIL
+  SMS
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String
+  role           UserRole  @default(SHIPPER)
+  company        String?
+  phone          String?
+  listings       Listing[] @relation("ListingOwner")
+  orders         Order[]   @relation("OrderShipper")
+  messages       Message[]
+  subscriptions  Subscription[]
+  payouts        Payout[]
+  disputesRaised Dispute[] @relation("DisputeShipper")
+  disputesOwned  Dispute[] @relation("DisputeCarrier")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Listing {
+  id             String        @id @default(cuid())
+  title          String
+  mode           String
+  originCity     String
+  originState    String
+  destinationCity String
+  destinationState String
+  pickupDate     DateTime
+  dropoffDate    DateTime
+  equipment      String
+  price          Int
+  distanceMiles  Int
+  status         ListingStatus @default(AVAILABLE)
+  ownerId        String
+  owner          User          @relation("ListingOwner", fields: [ownerId], references: [id])
+  orders         Order[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Order {
+  id            String       @id @default(cuid())
+  listingId     String
+  listing       Listing      @relation(fields: [listingId], references: [id])
+  shipperId     String
+  shipper       User         @relation("OrderShipper", fields: [shipperId], references: [id])
+  status        OrderStatus  @default(CONFIRMED)
+  price         Int
+  pickupDate    DateTime
+  dropoffDate   DateTime
+  paymentIntent String?
+  trackingUrl   String?
+  messages      Message[]
+  disputes      Dispute[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Message {
+  id        String         @id @default(cuid())
+  orderId   String
+  order     Order          @relation(fields: [orderId], references: [id])
+  senderId  String
+  sender    User           @relation(fields: [senderId], references: [id])
+  channel   MessageChannel @default(PLATFORM)
+  body      String
+  metadata  Json?
+  createdAt DateTime       @default(now())
+}
+
+model Subscription {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  tier       String
+  stripeId   String?
+  status     String   @default("active")
+  startedAt  DateTime @default(now())
+  expiresAt  DateTime?
+}
+
+model Payout {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  stripeId    String?
+  amountCents Int
+  status      String   @default("pending")
+  processedAt DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  orderId     String
+  order       Order         @relation(fields: [orderId], references: [id])
+  shipperId   String
+  shipper     User          @relation("DisputeShipper", fields: [shipperId], references: [id])
+  carrierId   String
+  carrier     User          @relation("DisputeCarrier", fields: [carrierId], references: [id])
+  status      DisputeStatus @default(OPEN)
+  reason      String
+  resolution  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
