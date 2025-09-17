@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply min-h-screen bg-brand-gradient text-white font-sans antialiased;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(11, 60, 138, 0.3);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(47, 178, 76, 0.65);
+  border-radius: 9999px;
+}
+
+.glass-panel {
+  @apply rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-glass;
+}
+
+.badge {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider;
+}
+
+.badge-available {
+  @apply badge bg-accent/20 text-accent-light;
+}
+
+.badge-booked {
+  @apply badge bg-backhauls-blue/20 text-backhauls-light;
+}
+
+.badge-pending {
+  @apply badge bg-yellow-400/20 text-yellow-300;
+}
+
+.map-tooltip {
+  @apply rounded-lg bg-backhauls-dark/90 px-3 py-2 text-xs shadow-lg;
+}
+
+.table-head {
+  @apply text-xs font-medium uppercase tracking-wide text-slate-200/70;
+}
+
+.table-row {
+  @apply grid grid-cols-[1.2fr,0.9fr,1fr,1fr,0.7fr] items-center rounded-2xl px-4 py-3 transition;
+}
+
+.table-row:hover {
+  @apply bg-white/10;
+}
+
+.table-row.active {
+  @apply bg-white/15 ring-2 ring-accent/60;
+}

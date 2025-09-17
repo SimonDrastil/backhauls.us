@@ -1,0 +1,22 @@
+[
+  { "origin": "Los Angeles, CA", "destination": "Denver, CO", "mode": "Truckload", "equipment": ["53' Dry Van"], "price": 1850 },
+  { "origin": "Seattle, WA", "destination": "Chicago, IL", "mode": "Truckload", "equipment": ["Reefer"], "price": 2350 },
+  { "origin": "Miami, FL", "destination": "Atlanta, GA", "mode": "LTL", "equipment": ["Box Truck"], "price": 950 },
+  { "origin": "New York, NY", "destination": "Boston, MA", "mode": "LTL", "equipment": ["Sprinter Van"], "price": 620 },
+  { "origin": "Dallas, TX", "destination": "Houston, TX", "mode": "Truckload", "equipment": ["Flatbed"], "price": 580 },
+  { "origin": "Phoenix, AZ", "destination": "Los Angeles, CA", "mode": "Truckload", "equipment": ["Power Only"], "price": 700 },
+  { "origin": "Chicago, IL", "destination": "Detroit, MI", "mode": "Truckload", "equipment": ["53' Dry Van"], "price": 520 },
+  { "origin": "Atlanta, GA", "destination": "New York, NY", "mode": "Air", "equipment": ["Air Cargo"], "price": 2650 },
+  { "origin": "Orlando, FL", "destination": "Dallas, TX", "mode": "Truckload", "equipment": ["Reefer"], "price": 1450 },
+  { "origin": "Boston, MA", "destination": "Philadelphia, PA", "mode": "LTL", "equipment": ["Box Truck"], "price": 780 },
+  { "origin": "Portland, OR", "destination": "Oakland, CA", "mode": "Ocean", "equipment": ["Ocean Container"], "price": 2100 },
+  { "origin": "Memphis, TN", "destination": "New Orleans, LA", "mode": "Truckload", "equipment": ["Flatbed"], "price": 690 },
+  { "origin": "Denver, CO", "destination": "Salt Lake City, UT", "mode": "Truckload", "equipment": ["Step Deck"], "price": 890 },
+  { "origin": "Charlotte, NC", "destination": "Columbus, OH", "mode": "Truckload", "equipment": ["53' Dry Van"], "price": 1180 },
+  { "origin": "Philadelphia, PA", "destination": "Pittsburgh, PA", "mode": "Truckload", "equipment": ["53' Dry Van"], "price": 540 },
+  { "origin": "Salt Lake City, UT", "destination": "Phoenix, AZ", "mode": "Truckload", "equipment": ["Power Only"], "price": 960 },
+  { "origin": "Oklahoma City, OK", "destination": "St. Louis, MO", "mode": "Truckload", "equipment": ["53' Dry Van"], "price": 840 },
+  { "origin": "Indianapolis, IN", "destination": "Chicago, IL", "mode": "LTL", "equipment": ["Box Truck"], "price": 410 },
+  { "origin": "Las Vegas, NV", "destination": "San Francisco, CA", "mode": "Truckload", "equipment": ["Reefer"], "price": 1120 },
+  { "origin": "Louisville, KY", "destination": "Atlanta, GA", "mode": "Truckload", "equipment": ["53' Dry Van"], "price": 780 }
+]

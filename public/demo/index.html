@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Backhauls.US Demo Map</title>
+    <style>
+      :root {
+        font-family: 'Inter', system-ui, sans-serif;
+        color: #fff;
+        background: radial-gradient(circle at top left, rgba(47, 178, 76, 0.35), transparent 45%),
+          linear-gradient(135deg, #031a3d, #0b3c8a 45%, #1552a2 80%);
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+      }
+      .panel {
+        width: min(960px, 90vw);
+        background: rgba(12, 31, 74, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 32px;
+        padding: 32px;
+        box-shadow: 0 20px 60px rgba(11, 60, 138, 0.35);
+      }
+      .lanes {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+      }
+      .lane {
+        padding: 12px 16px;
+        border-radius: 20px;
+        background: rgba(21, 82, 162, 0.35);
+        border: 1px solid rgba(47, 178, 76, 0.25);
+        backdrop-filter: blur(14px);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .lane:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(47, 178, 76, 0.25);
+      }
+      .lane strong {
+        display: block;
+        font-size: 1.1rem;
+      }
+      .lane span {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.75rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.7);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <h1>Backhauls.US offline demo</h1>
+      <p>Static render of the 20 marketplace lanes for quick demos without the Next.js stack.</p>
+      <div class="lanes" id="lanes"></div>
+    </div>
+    <script type="module">
+      import lanes from "./lanes.json" assert { type: "json" };
+
+      const container = document.getElementById("lanes");
+      lanes.forEach((lane) => {
+        const div = document.createElement("div");
+        div.className = "lane";
+        div.innerHTML = `
+          <strong>${lane.origin} → ${lane.destination}</strong>
+          <span>${lane.mode} · ${lane.equipment.join(" / ")}</span>
+          <span>$${lane.price.toLocaleString()}</span>
+        `;
+        container.appendChild(div);
+      });
+    </script>
+  </body>
+</html>
