@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Backhauls – Fill Deadhead Trips. Cut Costs. Ship Smarter.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-nav">
+        <div class="logo">
+          <span class="logo-symbol">⇢</span>
+          <span class="logo-wordmark">Backhauls</span>
+        </div>
+        <nav>
+          <a href="#landing" class="nav-link">Home</a>
+          <a href="#map" class="nav-link">Map</a>
+          <a href="#carrier-dashboard" class="nav-link">Carriers</a>
+          <a href="#shipper-dashboard" class="nav-link">Shippers</a>
+          <a href="#pricing" class="nav-link">Pricing</a>
+          <a href="#contact" class="nav-link">Contact</a>
+        </nav>
+        <div class="auth-actions">
+          <button class="btn ghost" data-open="login-modal">Login</button>
+          <button class="btn primary" data-open="signup-modal">Sign Up</button>
+        </div>
+      </header>
+
+      <main>
+        <section id="landing" class="page-section hero-section">
+          <div class="hero-content">
+            <p class="tagline">AI-Optimized Logistics Marketplace</p>
+            <h1>Fill Deadhead Trips. Cut Costs. Ship Smarter.</h1>
+            <p class="subtitle">
+              Backhauls connects carriers with unused capacity to shippers who need
+              fast, affordable freight.
+            </p>
+            <div class="cta-group">
+              <a href="#map" class="btn accent">Book a Trip</a>
+              <a href="#carrier-dashboard" class="btn secondary">Become a Carrier</a>
+            </div>
+            <div class="hero-stats">
+              <div class="stat-card">
+                <span class="stat-value">68%</span>
+                <span class="stat-label">Average savings over spot rates</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value">7k+</span>
+                <span class="stat-label">Live backhaul lanes today</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value">24/7</span>
+                <span class="stat-label">AI-assisted coverage</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="orbit-map">
+              <div class="glow"></div>
+              <div class="orbit-card">Predictive pricing</div>
+              <div class="orbit-card">Instant contracts</div>
+              <div class="orbit-card">Verified carriers</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page-section feature-strip">
+          <div class="feature-card">
+            <h3>Book instantly on the map</h3>
+            <p>Swipe through real-time lanes with AI-priced inventory and instant confirmation.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Lower rates, greener shipping</h3>
+            <p>Fill empty miles to reduce emissions and optimize your freight spend.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Carriers earn from empty legs</h3>
+            <p>List idle capacity in seconds and keep your fleet profitable on every trip.</p>
+          </div>
+        </section>
+
+        <section id="map" class="page-section map-page">
+          <aside class="filter-panel">
+            <h2>Find a Backhaul</h2>
+            <div class="filter-group">
+              <label>Origin City</label>
+              <input type="text" id="originInput" placeholder="e.g. Dallas" />
+            </div>
+            <div class="filter-group">
+              <label>Destination City</label>
+              <input type="text" id="destinationInput" placeholder="e.g. Atlanta" />
+            </div>
+            <div class="filter-group">
+              <label>Departure Date</label>
+              <input type="date" id="dateInput" />
+            </div>
+            <div class="filter-group">
+              <label>Vehicle Type</label>
+              <div class="chip-group" id="vehicleFilter">
+                <button class="chip active" data-type="all">All</button>
+                <button class="chip" data-type="truck">Truck</button>
+                <button class="chip" data-type="plane">Plane</button>
+                <button class="chip" data-type="ship">Ship</button>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label>Minimum Capacity (lbs)</label>
+              <input type="range" id="capacityRange" min="0" max="45000" step="1000" />
+              <div class="range-value" id="capacityLabel">0 lbs</div>
+            </div>
+            <button class="btn primary stretch" id="clearFilters">Clear Filters</button>
+          </aside>
+          <div class="map-wrapper">
+            <div class="map-container" id="mapContainer"></div>
+            <div class="map-overlay">
+              <div class="legend">
+                <span class="legend-dot truck"></span>Truck
+                <span class="legend-dot plane"></span>Air
+                <span class="legend-dot ship"></span>Ocean
+              </div>
+            </div>
+            <div class="detail-drawer" id="detailDrawer">
+              <div class="drawer-header">
+                <h3>Trip Details</h3>
+                <button class="icon-btn" id="closeDrawer">×</button>
+              </div>
+              <div class="drawer-content" id="drawerContent">
+                <p>Select a route to see details.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page-section booking-flow" id="bookingFlow">
+          <h2>How Booking Works</h2>
+          <div class="flow-grid">
+            <div class="flow-step">
+              <span class="step-number">1</span>
+              <h3>Select a trip</h3>
+              <p>Tap a live marker on the Backhauls map to inspect pricing, timing, and available capacity.</p>
+            </div>
+            <div class="flow-step">
+              <span class="step-number">2</span>
+              <h3>Enter shipment details</h3>
+              <p>Provide cargo info, weight, dimensions, and any special handling instructions.</p>
+            </div>
+            <div class="flow-step">
+              <span class="step-number">3</span>
+              <h3>Confirm instantly</h3>
+              <p>Lock your rate, receive documents, and track status in the shipper dashboard.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="carrier-dashboard" class="page-section dashboard">
+          <header class="section-header">
+            <h2>Carrier Command Center</h2>
+            <p>Monetize empty capacity and manage every backhaul in one AI-powered workspace.</p>
+          </header>
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <h3>Earnings Summary</h3>
+              <div class="metric-row">
+                <span class="metric">$48,720</span>
+                <span class="metric-sub">Last 30 days</span>
+              </div>
+              <div class="sparkline" data-trend="up"></div>
+            </div>
+            <div class="dashboard-card">
+              <h3>Active Trips</h3>
+              <ul class="status-list" id="carrierActiveTrips"></ul>
+            </div>
+            <div class="dashboard-card">
+              <h3>Available Capacity</h3>
+              <div class="capacity-meter">
+                <div class="capacity-fill" style="width: 68%"></div>
+              </div>
+              <p class="metric-sub">34,000 lbs posted of 50,000 lbs fleet</p>
+            </div>
+          </div>
+          <div class="form-card">
+            <h3>Add New Backhaul</h3>
+            <form id="carrierForm" class="grid-form">
+              <label>From City<input type="text" name="origin" required /></label>
+              <label>To City<input type="text" name="destination" required /></label>
+              <label>Date<input type="date" name="date" required /></label>
+              <label>Time<input type="time" name="time" required /></label>
+              <label>Capacity (lbs)<input type="number" name="capacity" min="1000" step="500" required /></label>
+              <label>Price<input type="number" name="price" min="100" step="10" required /></label>
+              <label>Vehicle Type
+                <select name="vehicle" required>
+                  <option value="truck">Truck</option>
+                  <option value="plane">Plane</option>
+                  <option value="ship">Ship</option>
+                </select>
+              </label>
+              <button class="btn accent" type="submit">Submit Backhaul</button>
+            </form>
+            <p class="form-note" id="carrierFormNote">Your new lane goes live on the marketplace instantly.</p>
+          </div>
+        </section>
+
+        <section id="shipper-dashboard" class="page-section dashboard alt-bg">
+          <header class="section-header">
+            <h2>Shipper Workspace</h2>
+            <p>Control towers, predictive ETAs, and instant access to every booked backhaul.</p>
+          </header>
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <h3>My Bookings</h3>
+              <ul class="status-list" id="shipperBookings"></ul>
+            </div>
+            <div class="dashboard-card">
+              <h3>Upcoming Deliveries</h3>
+              <div class="timeline" id="shipperTimeline"></div>
+            </div>
+            <div class="dashboard-card">
+              <h3>Spend Insights</h3>
+              <div class="insight-grid">
+                <div>
+                  <span class="metric">$12,450</span>
+                  <span class="metric-sub">This month</span>
+                </div>
+                <div>
+                  <span class="metric green">-22%</span>
+                  <span class="metric-sub">vs market average</span>
+                </div>
+              </div>
+              <div class="sparkline" data-trend="flat"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="admin-analytics" class="page-section analytics">
+          <header class="section-header">
+            <h2>Admin Analytics</h2>
+            <p>Oversee supply, demand, and marketplace health in real time.</p>
+          </header>
+          <div class="analytics-grid">
+            <div class="analytics-card">
+              <h3>Marketplace Snapshot</h3>
+              <div class="stat-line"><span>Total bookings</span><strong>4,892</strong></div>
+              <div class="stat-line"><span>Active shippers</span><strong>1,204</strong></div>
+              <div class="stat-line"><span>Active carriers</span><strong>982</strong></div>
+              <div class="stat-line"><span>Average price</span><strong>$1.92/mi</strong></div>
+            </div>
+            <div class="analytics-card">
+              <h3>Weekly Demand vs Capacity</h3>
+              <div class="chart-grid" id="demandChart"></div>
+            </div>
+            <div class="analytics-card">
+              <h3>Earnings Breakdown</h3>
+              <div class="pie-chart">
+                <div class="slice slice-a"></div>
+                <div class="slice slice-b"></div>
+                <div class="slice slice-c"></div>
+              </div>
+              <ul class="legend-list">
+                <li><span class="legend-dot truck"></span> Linehaul 58%</li>
+                <li><span class="legend-dot plane"></span> Premium 26%</li>
+                <li><span class="legend-dot ship"></span> International 16%</li>
+              </ul>
+            </div>
+            <div class="analytics-card">
+              <h3>Quick Actions</h3>
+              <div class="action-list">
+                <button class="btn ghost">Approve new carriers</button>
+                <button class="btn ghost">Manage listings</button>
+                <button class="btn ghost">Refund / adjust booking</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" class="page-section pricing">
+          <header class="section-header">
+            <h2>Pricing for Carriers</h2>
+            <p>Choose the plan that matches your fleet size and automation needs.</p>
+          </header>
+          <div class="pricing-grid">
+            <div class="pricing-card">
+              <h3>Basic</h3>
+              <p class="price">$99<span>/mo</span></p>
+              <ul>
+                <li>List up to 5 active backhauls</li>
+                <li>Real-time messaging</li>
+                <li>Standard analytics</li>
+              </ul>
+              <button class="btn secondary">Start Basic</button>
+            </div>
+            <div class="pricing-card featured">
+              <div class="badge">Popular</div>
+              <h3>Pro</h3>
+              <p class="price">$249<span>/mo</span></p>
+              <ul>
+                <li>Unlimited backhaul listings</li>
+                <li>Smart re-pricing engine</li>
+                <li>Driver app + telematics</li>
+                <li>Dedicated success manager</li>
+              </ul>
+              <button class="btn accent">Start Pro</button>
+            </div>
+            <div class="pricing-card">
+              <h3>Enterprise</h3>
+              <p class="price">Custom</p>
+              <ul>
+                <li>API + EDI integrations</li>
+                <li>Network design support</li>
+                <li>White glove onboarding</li>
+              </ul>
+              <button class="btn secondary">Contact Sales</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" class="page-section contact">
+          <header class="section-header">
+            <h2>Contact Backhauls</h2>
+            <p>Our logistics strategists respond within minutes.</p>
+          </header>
+          <div class="contact-grid">
+            <form class="contact-form" id="contactForm">
+              <label>Name<input type="text" name="name" required /></label>
+              <label>Email<input type="email" name="email" required /></label>
+              <label>Company<input type="text" name="company" /></label>
+              <label>How can we help?
+                <textarea name="message" rows="4" placeholder="Tell us about your freight"></textarea>
+              </label>
+              <button class="btn accent" type="submit">Send message</button>
+            </form>
+            <div class="contact-info">
+              <div class="info-card">
+                <h3>Sales</h3>
+                <p>sales@backhauls.us</p>
+              </div>
+              <div class="info-card">
+                <h3>Support</h3>
+                <p>support@backhauls.us</p>
+              </div>
+              <div class="info-card">
+                <h3>HQ</h3>
+                <p>Austin, TX · 24/7 Operations</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="auth" class="page-section auth-section">
+          <header class="section-header">
+            <h2>Access Your Account</h2>
+            <p>Modern authentication flows for shippers, carriers, and admins.</p>
+          </header>
+          <div class="auth-grid">
+            <div class="auth-card">
+              <h3>Login</h3>
+              <form id="loginForm">
+                <label>Email<input type="email" required /></label>
+                <label>Password<input type="password" required /></label>
+                <div class="form-actions">
+                  <button class="btn secondary" type="submit">Login</button>
+                  <button class="link-btn" type="button" data-open="reset-modal">Forgot password?</button>
+                </div>
+              </form>
+            </div>
+            <div class="auth-card">
+              <h3>Sign Up</h3>
+              <form id="signupForm">
+                <label>Full name<input type="text" required /></label>
+                <label>Business email<input type="email" required /></label>
+                <label>Company<input type="text" required /></label>
+                <label>Role
+                  <select>
+                    <option>Shipper</option>
+                    <option>Carrier</option>
+                    <option>Broker</option>
+                  </select>
+                </label>
+                <button class="btn accent" type="submit">Create account</button>
+              </form>
+            </div>
+            <div class="auth-card">
+              <h3>Password Reset</h3>
+              <form id="resetForm">
+                <label>Email<input type="email" required /></label>
+                <button class="btn secondary" type="submit">Send reset link</button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-top">
+          <div class="logo">
+            <span class="logo-symbol">⇢</span>
+            <span class="logo-wordmark">Backhauls</span>
+          </div>
+          <p class="tagline">Backhauls – Fill Empty Miles</p>
+        </div>
+        <div class="footer-links">
+          <a href="#landing">About</a>
+          <a href="#contact">Careers</a>
+          <a href="#landing">Blog</a>
+          <a href="#contact">Contact</a>
+          <a href="#">Terms</a>
+          <a href="#">Privacy</a>
+        </div>
+      </footer>
+    </div>
+
+    <div class="modal" id="bookingModal">
+      <div class="modal-content">
+        <button class="icon-btn close" data-close>×</button>
+        <div class="modal-body" id="bookingSteps"></div>
+      </div>
+    </div>
+
+    <div class="modal" id="login-modal">
+      <div class="modal-content narrow">
+        <button class="icon-btn close" data-close>×</button>
+        <h3>Login to Backhauls</h3>
+        <form class="stacked-form">
+          <label>Email<input type="email" required /></label>
+          <label>Password<input type="password" required /></label>
+          <button class="btn accent" type="submit">Login</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="signup-modal">
+      <div class="modal-content narrow">
+        <button class="icon-btn close" data-close>×</button>
+        <h3>Create your marketplace account</h3>
+        <form class="stacked-form">
+          <label>Full name<input type="text" required /></label>
+          <label>Email<input type="email" required /></label>
+          <label>Company<input type="text" required /></label>
+          <label>Role
+            <select>
+              <option>Shipper</option>
+              <option>Carrier</option>
+              <option>Broker</option>
+            </select>
+          </label>
+          <button class="btn accent" type="submit">Get started</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="reset-modal">
+      <div class="modal-content narrow">
+        <button class="icon-btn close" data-close>×</button>
+        <h3>Reset password</h3>
+        <p>We will send a secure link to your inbox.</p>
+        <form class="stacked-form">
+          <label>Email<input type="email" required /></label>
+          <button class="btn secondary" type="submit">Send reset link</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
