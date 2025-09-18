@@ -1,3 +1,5 @@
+const GEOAPIFY_API_KEY = 'd2f92aeb8b774dbcbd4aacbb3158f1a0';
+
 const trips = [
   {
     id: 't1',
@@ -99,27 +101,27 @@ const trips = [
   },
 ];
 
-const cityPositions = {
-  'Dallas, TX': { top: 61, left: 47 },
-  'Atlanta, GA': { top: 63, left: 55 },
-  'Chicago, IL': { top: 44, left: 52 },
-  'New York, NY': { top: 43, left: 64 },
-  'Los Angeles, CA': { top: 65, left: 14 },
-  'Denver, CO': { top: 52, left: 33 },
-  'Seattle, WA': { top: 21, left: 12 },
-  'San Francisco, CA': { top: 52, left: 14 },
-  'Houston, TX': { top: 68, left: 47 },
-  'Miami, FL': { top: 75, left: 60 },
-  'Phoenix, AZ': { top: 60, left: 22 },
-  'Kansas City, MO': { top: 52, left: 45 },
-  'Boston, MA': { top: 39, left: 67 },
-  'Detroit, MI': { top: 44, left: 54 },
-  'Nashville, TN': { top: 58, left: 52 },
-  'Portland, OR': { top: 24, left: 10 },
-  'Las Vegas, NV': { top: 60, left: 19 },
-  'Charlotte, NC': { top: 59, left: 57 },
-  'Minneapolis, MN': { top: 37, left: 46 },
-  'Salt Lake City, UT': { top: 53, left: 26 },
+const cityCoordinates = {
+  'Dallas, TX': { lat: 32.7767, lon: -96.797 },
+  'Atlanta, GA': { lat: 33.749, lon: -84.388 },
+  'Chicago, IL': { lat: 41.8781, lon: -87.6298 },
+  'New York, NY': { lat: 40.7128, lon: -74.006 },
+  'Los Angeles, CA': { lat: 34.0522, lon: -118.2437 },
+  'Denver, CO': { lat: 39.7392, lon: -104.9903 },
+  'Seattle, WA': { lat: 47.6062, lon: -122.3321 },
+  'San Francisco, CA': { lat: 37.7749, lon: -122.4194 },
+  'Houston, TX': { lat: 29.7604, lon: -95.3698 },
+  'Miami, FL': { lat: 25.7617, lon: -80.1918 },
+  'Phoenix, AZ': { lat: 33.4484, lon: -112.074 },
+  'Kansas City, MO': { lat: 39.0997, lon: -94.5786 },
+  'Boston, MA': { lat: 42.3601, lon: -71.0589 },
+  'Detroit, MI': { lat: 42.3314, lon: -83.0458 },
+  'Nashville, TN': { lat: 36.1627, lon: -86.7816 },
+  'Portland, OR': { lat: 45.5152, lon: -122.6784 },
+  'Las Vegas, NV': { lat: 36.1699, lon: -115.1398 },
+  'Charlotte, NC': { lat: 35.2271, lon: -80.8431 },
+  'Minneapolis, MN': { lat: 44.9778, lon: -93.265 },
+  'Salt Lake City, UT': { lat: 40.7608, lon: -111.891 },
 };
 
 const carrierActiveTripsData = [
@@ -161,21 +163,56 @@ const bookingSteps = document.getElementById('bookingSteps');
 const capacityRange = document.getElementById('capacityRange');
 const capacityLabel = document.getElementById('capacityLabel');
 
-function getCityPosition(city) {
-  return cityPositions[city] || { top: 50, left: 50 };
+let map;
+let mapReady = false;
+const mapMarkers = [];
+const routeSourceId = 'selected-route';
+const routeLayerId = 'selected-route-layer';
+const emptyRouteGeoJSON = { type: 'FeatureCollection', features: [] };
+
+function getCityCoordinate(city) {
+  return cityCoordinates[city] || null;
 }
 
 function computeMarkerPosition(trip) {
-  const origin = getCityPosition(trip.origin);
-  const destination = getCityPosition(trip.destination);
+  const origin = getCityCoordinate(trip.origin);
+  const destination = getCityCoordinate(trip.destination);
+  if (!origin || !destination) return null;
   return {
-    top: (origin.top + destination.top) / 2,
-    left: (origin.left + destination.left) / 2,
+    lat: (origin.lat + destination.lat) / 2,
+    lon: (origin.lon + destination.lon) / 2,
   };
 }
 
 function clearMarkers() {
-  mapContainer.querySelectorAll('.map-marker').forEach((marker) => marker.remove());
+  while (mapMarkers.length) {
+    const marker = mapMarkers.pop();
+    marker.remove();
+  }
+}
+
+async function ensureCityCoordinate(city) {
+  if (!city) return null;
+  if (cityCoordinates[city]) return cityCoordinates[city];
+
+  try {
+    const response = await fetch(
+      `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(city)}&limit=1&apiKey=${GEOAPIFY_API_KEY}`
+    );
+    if (!response.ok) throw new Error('Geoapify geocoding failed');
+    const data = await response.json();
+    const feature = data.features && data.features[0];
+    if (!feature) return null;
+    const { lat, lon } = feature.properties;
+    const latNum = Number(lat);
+    const lonNum = Number(lon);
+    if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) return null;
+    cityCoordinates[city] = { lat: latNum, lon: lonNum };
+    return cityCoordinates[city];
+  } catch (error) {
+    console.error('Failed to geocode city', city, error);
+    return null;
+  }
 }
 
 function formatPrice(amount) {
@@ -193,34 +230,102 @@ function applyFilters(trip) {
 }
 
 function renderMarkers() {
+  if (!mapReady) return;
   clearMarkers();
+
   const filteredTrips = trips.filter(applyFilters);
+  let selectionVisible = false;
+
   filteredTrips.forEach((trip) => {
-    const marker = document.createElement('button');
-    marker.className = 'map-marker';
-    marker.dataset.id = trip.id;
-    marker.dataset.type = trip.type;
-    const { top, left } = computeMarkerPosition(trip);
-    marker.style.top = `${top}%`;
-    marker.style.left = `${left}%`;
-    marker.innerHTML = `<span class="price">${formatPrice(trip.price)}</span><span>${trip.destination.split(',')[0]}</span>`;
+    const position = computeMarkerPosition(trip);
+    if (!position) return;
+
+    const markerElement = document.createElement('button');
+    markerElement.className = 'map-marker';
+    markerElement.dataset.id = trip.id;
+    markerElement.dataset.type = trip.type;
+    markerElement.innerHTML = `<span class="price">${formatPrice(trip.price)}</span><span>${trip.destination.split(',')[0]}</span>`;
 
     if (trip.highlight) {
-      marker.classList.add('new');
+      markerElement.classList.add('new');
     }
 
     if (trip.id === selectedTripId) {
-      marker.classList.add('active');
+      markerElement.classList.add('active');
+      selectionVisible = true;
     }
 
-    marker.addEventListener('click', () => {
+    markerElement.addEventListener('click', (event) => {
+      event.stopPropagation();
       selectedTripId = trip.id;
       renderMarkers();
       openDrawer(trip);
     });
 
-    mapContainer.appendChild(marker);
+    const mapMarker = new maplibregl.Marker({ element: markerElement, anchor: 'bottom' })
+      .setLngLat([position.lon, position.lat])
+      .addTo(map);
+
+    mapMarkers.push(mapMarker);
   });
+
+  if (selectedTripId && !selectionVisible) {
+    selectedTripId = null;
+    detailDrawer.classList.remove('open');
+    drawerContent.innerHTML = '<p>Select a route to see details.</p>';
+    clearRoute();
+  }
+}
+
+function focusOnTrip(trip) {
+  if (!mapReady) return;
+  const origin = getCityCoordinate(trip.origin);
+  const destination = getCityCoordinate(trip.destination);
+  if (!origin || !destination) return;
+
+  const bounds = new maplibregl.LngLatBounds(
+    [origin.lon, origin.lat],
+    [origin.lon, origin.lat]
+  );
+  bounds.extend([destination.lon, destination.lat]);
+
+  if (Math.abs(origin.lat - destination.lat) < 0.01 && Math.abs(origin.lon - destination.lon) < 0.01) {
+    map.flyTo({ center: [origin.lon, origin.lat], zoom: 7.2, essential: true });
+    return;
+  }
+
+  map.fitBounds(bounds, { padding: 100, duration: 1200, maxZoom: 7.5 });
+}
+
+function highlightRoute(trip) {
+  if (!mapReady || !map.getSource(routeSourceId)) return;
+  const origin = getCityCoordinate(trip.origin);
+  const destination = getCityCoordinate(trip.destination);
+  if (!origin || !destination) return;
+
+  const featureCollection = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [origin.lon, origin.lat],
+            [destination.lon, destination.lat],
+          ],
+        },
+      },
+    ],
+  };
+
+  map.getSource(routeSourceId).setData(featureCollection);
+}
+
+function clearRoute() {
+  if (!mapReady || !map.getSource(routeSourceId)) return;
+  map.getSource(routeSourceId).setData(emptyRouteGeoJSON);
 }
 
 function openDrawer(trip) {
@@ -258,11 +363,15 @@ function openDrawer(trip) {
   `;
   detailDrawer.classList.add('open');
   drawerContent.querySelector('#bookNow').addEventListener('click', () => openBookingModal(trip));
+  highlightRoute(trip);
+  focusOnTrip(trip);
 }
 
 function closeDrawer() {
   detailDrawer.classList.remove('open');
   selectedTripId = null;
+  drawerContent.innerHTML = '<p>Select a route to see details.</p>';
+  clearRoute();
   renderMarkers();
 }
 
@@ -305,7 +414,6 @@ document.getElementById('clearFilters').addEventListener('click', () => {
   capacityRange.value = 0;
   capacityLabel.textContent = '0 lbs';
   vehicleFilter.querySelectorAll('.chip').forEach((chip) => chip.classList.toggle('active', chip.dataset.type === 'all'));
-  renderMarkers();
   closeDrawer();
 });
 
@@ -491,9 +599,23 @@ function renderDemandChart() {
 function handleCarrierForm() {
   const form = document.getElementById('carrierForm');
   const note = document.getElementById('carrierFormNote');
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(form).entries());
+    note.textContent = 'Publishing your backhaul…';
+    note.style.color = 'var(--text-muted)';
+
+    const [originCoords, destinationCoords] = await Promise.all([
+      ensureCityCoordinate(data.origin),
+      ensureCityCoordinate(data.destination),
+    ]);
+
+    if (!originCoords || !destinationCoords) {
+      note.textContent = 'We could not locate one of those cities. Please verify spelling or include the state.';
+      note.style.color = '#ff6b6b';
+      return;
+    }
+
     const id = `t${trips.length + 1}`;
     const newTrip = {
       id,
@@ -511,6 +633,7 @@ function handleCarrierForm() {
       highlight: true,
     };
     trips.push(newTrip);
+    selectedTripId = newTrip.id;
     renderMarkers();
     openDrawer(newTrip);
     note.textContent = `Backhaul ${data.origin} → ${data.destination} published to map.`;
@@ -520,6 +643,50 @@ function handleCarrierForm() {
       newTrip.highlight = false;
       renderMarkers();
     }, 6000);
+  });
+}
+
+function initializeMap() {
+  if (map) return;
+
+  map = new maplibregl.Map({
+    container: mapContainer,
+    style: `https://maps.geoapify.com/v1/styles/dark-matter/style.json?apiKey=${GEOAPIFY_API_KEY}`,
+    center: [-98.5795, 39.8283],
+    zoom: 4,
+    pitch: 0,
+    attributionControl: true,
+  });
+
+  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+
+  window.addEventListener('resize', () => {
+    if (mapReady) {
+      map.resize();
+    }
+  });
+
+  map.on('load', () => {
+    mapReady = true;
+    map.resize();
+    if (!map.getSource(routeSourceId)) {
+      map.addSource(routeSourceId, { type: 'geojson', data: emptyRouteGeoJSON });
+    }
+    if (!map.getLayer(routeLayerId)) {
+      map.addLayer({
+        id: routeLayerId,
+        type: 'line',
+        source: routeSourceId,
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': '#2FB24C',
+          'line-width': 4,
+          'line-opacity': 0.85,
+          'line-blur': 0.5,
+        },
+      });
+    }
+    renderMarkers();
   });
 }
 
@@ -547,7 +714,7 @@ function attachFormHandlers() {
 }
 
 function init() {
-  renderMarkers();
+  initializeMap();
   renderCarrierActiveTrips();
   renderShipperBookings();
   renderShipperTimeline();
